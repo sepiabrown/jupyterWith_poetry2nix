@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "my-python-poetry"
+version = "0.0.1"
+description = ""
+authors = ["Suwon Park <sepiabrown@naver.com>"]
+
+[tool.poetry.dependencies]
+python = "~3.9"
+twine = "^4.0.1"
+# cryptography needed by SecretStorage needed by keyring needed by twine
+# version fixed due to sha256
+cryptography = "37.0.4"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

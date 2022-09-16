@@ -4,10 +4,11 @@
     nixpkgs.url = "nixpkgs/nixos-22.05"; 
     flake-utils = {
       url = "github:numtide/flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     jupyterWith = {
-      url = "github:tweag/jupyterWith";#/python39_and_poetry2nix"; /environment_variables_test"; 
-      #inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:tweag/jupyterWith"; 
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -28,14 +29,12 @@
                   inherit (pyfinal)
                     bootstrapped-pip
                     pipInstallHook;
-                    #setuptoolsBuildHook
                 };
                 # With this, skipSetupToolsSCM in mk-poetry-dep.nix is not needed
                 setuptools-scm = pyfinal.python_selected.pkgs.setuptools-scm.override {
                   inherit (pyfinal)
                     packaging
                     tomli
-                    #typing-extensions
                     setuptools;
                 };
                 pip = pyfinal.python_selected.pkgs.pip.override {
@@ -50,6 +49,7 @@
                 };
                 ### Must needed to dodge infinite recursion (end) ###
 
+                ### override python packages if they lack dependencies
                 # needed by requests needed by twine
                 idna = pyprev.idna.overridePythonAttrs (old: rec {
                   propagatedBuildInputs = builtins.filter (x: ! builtins.elem x [ ]) ((old.propagatedBuildInputs or [ ]) ++ [ pyfinal.flit-core ]);
@@ -69,11 +69,11 @@
         })
         ]
       );
-    } // (flake-utils.lib.eachDefaultSystem (system: # `//` : set appending behind output
+    } // (flake-utils.lib.eachDefaultSystem (system: 
       rec
       {
         pkgs = import nixpkgs {
-          inherit system; #system = "x86_64-linux";
+          inherit system;
           config.allowUnfree = true;
           overlays = [ self.overlay ];
         };
@@ -87,7 +87,7 @@
         depNames = builtins.attrNames pyproject.tool.poetry.dependencies;
 
         iPythonWithPackages = pkgs.jupyterWith_python_custom.kernels.iPythonWith {
-          name = "ms-thesis--env";
+          name = "my-awesome-python-env";
           python3 = python_custom;
           packages = p:
             let
